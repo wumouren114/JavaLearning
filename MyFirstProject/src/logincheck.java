@@ -11,6 +11,7 @@ public class logincheck {
         if (user.equals("wumouren114") && pwd.equals("123456")) {
             System.out.println("登陆成功，欢迎回来！");
         } else {
+            
             System.out.println("用户名或密码名错误");
         }
         sc.close();
