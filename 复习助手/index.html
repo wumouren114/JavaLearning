@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Java 复习助手 · 知识点检索</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#1e293b; --panel2:#273449; --line:#334155;
+    --txt:#e2e8f0; --dim:#94a3b8; --accent:#38bdf8; --accent2:#22d3ee;
+    --mark:#fde047; --mark-txt:#1f2937;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif;line-height:1.7}
+  header{padding:22px 20px 12px;border-bottom:1px solid var(--line);
+         background:linear-gradient(180deg,#1e293b,#0f172a)}
+  h1{margin:0;font-size:22px;letter-spacing:1px}
+  h1 span{color:var(--accent)}
+  .sub{color:var(--dim);font-size:13px;margin-top:6px}
+  nav{display:flex;gap:8px;padding:12px 20px;border-bottom:1px solid var(--line);
+      position:sticky;top:0;background:rgba(15,23,42,.95);backdrop-filter:blur(6px);z-index:9}
+  .tab{background:var(--panel);color:var(--txt);border:1px solid var(--line);
+       padding:8px 14px;border-radius:999px;cursor:pointer;font-size:14px}
+  .tab:hover{border-color:var(--accent)}
+  .tab.active{background:var(--accent);color:#06283d;border-color:var(--accent);font-weight:600}
+  main{padding:18px 20px 60px;max-width:1000px;margin:0 auto}
+  .panel{display:none}
+  .panel.active{display:block}
+  .searchbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  input[type=text]{flex:1;min-width:240px;padding:12px 14px;border-radius:10px;
+       border:1px solid var(--line);background:var(--panel);color:var(--txt);font-size:15px;outline:none}
+  input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,.15)}
+  button{padding:12px 18px;border-radius:10px;border:none;cursor:pointer;
+         background:var(--accent);color:#06283d;font-weight:700;font-size:14px}
+  button:hover{filter:brightness(1.08)}
+  button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent);font-weight:600}
+  button.mini{padding:6px 10px;font-size:12px;border-radius:8px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+  .chip{background:var(--panel);border:1px solid var(--line);color:var(--dim);
+        padding:5px 12px;border-radius:999px;font-size:12.5px;cursor:pointer}
+  .chip:hover{color:var(--txt);border-color:var(--accent)}
+  .chip.active{background:var(--accent2);color:#04222b;border-color:var(--accent2);font-weight:700}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+        padding:16px 18px;margin-bottom:14px}
+  .card:hover{border-color:#475569}
+  .card h3{margin:0 0 8px;font-size:16.5px;color:#f8fafc}
+  .card .meta{font-size:12px;color:var(--dim);margin-bottom:8px}
+  .card .body{font-size:14.5px;color:#cbd5e1;white-space:pre-wrap}
+  .tagline{display:inline-block;background:var(--panel2);border:1px solid var(--line);
+           color:var(--accent2);font-size:11.5px;padding:1px 8px;border-radius:999px;margin-right:6px}
+  mark{background:var(--mark);color:var(--mark-txt);font-weight:700;padding:0 2px;border-radius:3px}
+  .hint{color:var(--dim);font-size:13px;margin:0 0 12px}
+  .empty{color:var(--dim);text-align:center;padding:36px 0}
+  .qa-item{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+           padding:12px 16px;margin-bottom:10px}
+  .qa-item .q{font-size:14.5px;color:#f1f5f9}
+  .qa-item .when{font-size:12px;color:var(--dim);margin-top:6px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .count{color:var(--accent2);font-weight:700}
+  footer{color:#64748b;font-size:12.5px;text-align:center;padding:24px 20px 40px}
+  .answer{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+  .answer.show{display:block}
+</style>
+</head>
+<body>
+<header>
+  <h1>Java <span>复习助手</span></h1>
+  <div class="sub">知识点检索 · 关键词高亮 · 独立问答记录 &nbsp;|&nbsp; <span id="stat"></span></div>
+</header>
+
+<nav>
+  <button class="tab active" data-tab="search">🔍 搜索知识点</button>
+  <button class="tab" data-tab="qa">💬 问答速查</button>
+  <button class="tab" data-tab="log">📝 我的提问记录</button>
+</nav>
+
+<main>
+  <section id="tab-search" class="panel active">
+    <div class="searchbar">
+      <input type="text" id="q" placeholder="输入关键词，例如：equals、整数除法、短路、Scanner、break、报错…（回车搜索）" autocomplete="off">
+      <button id="btnSearch">搜索</button>
+      <button id="btnRandom" class="ghost">🎲 随机抽查</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div id="results" class="results"></div>
+  </section>
+
+  <section id="tab-qa" class="panel">
+    <p class="hint">把你的疑问写进去，工具会从知识库里找出最相关的条目。每次提问都会记进"我的提问记录"（独立保存，不进入聊天记录）。</p>
+    <div class="searchbar">
+      <input type="text" id="qaInput" placeholder="例如：为什么整数除法会丢小数？为什么 String 不能用 == ？" autocomplete="off">
+      <button id="btnAsk">查找答案</button>
+    </div>
+    <div id="qaResult" class="results"></div>
+  </section>
+
+  <section id="tab-log" class="panel">
+    <p class="hint">这里只记录你在本工具里的提问（存在浏览器本地，可导出成 Markdown 存进笔记）。</p>
+    <div class="row">
+      <button id="btnExport" class="ghost mini">导出为文件</button>
+      <button id="btnCopy" class="ghost mini">复制为 Markdown</button>
+      <button id="btnClear" class="ghost mini">清空记录</button>
+    </div>
+    <div id="logList"></div>
+  </section>
+</main>
+
+<footer>Java 复习助手 v1 · 知识库范围：P0 ~ P1 第 2 课 · 由老师随课程持续更新</footer>
+
+<script>
+/* ============ 知识库（随课程持续补充） ============ */
+const KB = [
+  { id:"compile", tags:["P0"], kw:["javac","java","编译","运行","jvm","字节码","class",".class","跨平台","jdk","src"],
+    title:"javac 编译、java 运行、JVM 与跨平台",
+    body:"你写的 HelloWorld.java 是给人看的源码；javac（编译器）把它翻译成 HelloWorld.class 字节码（用记事本打开是乱码）。java 命令启动 JVM 执行 .class。\nJDK = javac + JVM + 类库 的工具箱。\n跨平台原理：每个系统各自装了自己版本的 JVM，而 .class 是统一的语言，所以写一次到处能跑。\n命令：javac -encoding UTF-8 -d out src/HelloWorld.java → java -cp out HelloWorld" },
+
+  { id:"main", tags:["P0"], kw:["main","psvm","入口","咒语","public","static","void","String[] args"],
+    title:"main 方法：程序入口（固定咒语）",
+    body:"public static void main(String[] args) —— JVM 启动后第一个找的就是它，从这里开始逐行执行。一个字符都不能错。\npublic 公开 / static 静态 / void 无返回值 / main 方法名 / String[] args 参数格式（现阶段先背整句）。\nIDEA 里输入 psvm 再按 Tab 可自动生成。" },
+
+  { id:"git-basic", tags:["工具"], kw:["git","三连","add","commit","push","github","cd","仓库","存档"],
+    title:'Git 每天"收工三连"',
+    body:"cd C:\\Users\\38875\\Desktop\\Java学习 → git add . → git commit -m \"今天学了什么\" → git push\n含义：add 装进篮子；commit 本地拍快照；push 上传 GitHub。\npush 成功会看到 main -> main。GitHub 网页能打开仓库看到文件即成功。" },
+
+  { id:"git-err", tags:["报错","工具"], kw:["not a git repository","add.","connection reset","vpn","token","钥匙","站错"],
+    title:"Git 常见报错",
+    body:"not a git repository = 终端站错文件夹，先 cd 到 Java学习 目录。\ngit: 'add.' is not a git command = add 和 . 之间少空格。\nConnection was reset = 网络问题，开 VPN 再 push。\n要令牌（ghp_ 开头）：GitHub 不支持用登录密码推送。" },
+
+  { id:"debug", tags:["P0"], kw:["断点","调试","debug","f8","f9","variables","变量面板","单步"],
+    title:"断点调试：偷看程序内部",
+    body:"在行号左边点一下 → 出红点（断点）；点绿色甲虫（Shift+F9）以 Debug 运行。\n程序停在红点那行（变蓝）时，下方 Variables/变量面板能看到每个变量的值。\nF8 单步走一步；F9 直接跑完。查 bug 靠它。" },
+
+  { id:"errors", tags:["报错"], kw:["报错","需要';'","cannot find symbol","分号","未初始化","lossy conversion","全角","非法字符","equals 爆红"],
+    title:"高频报错速查",
+    body:"需要 ';' → 上一行漏分号（注意用英文半角分号）。\ncannot find symbol → 名字拼错 / 没 import / 类名与文件名不一致。\nmight not have been initialized → 变量声明了没赋值就使用。\npossible lossy conversion → 大类型塞进小类型，要强转。\n非法字符 / 全角报错 → 用了中文标点（；：（）\"\"），切英文输入法。" },
+
+  { id:"var-box", tags:["P1-基础"], kw:["变量","盒子","声明","赋值","覆盖","=","装进去","内存"],
+    title:"变量 = 带名字的盒子",
+    body:"内存是一排排格子；变量就是你贴了名字标签的格子。\n声明 int age; → 赋值 age = 18; → 使用 println(age)。\n= 是\"把右边装进左边\"，不是数学的等于。\n盒子只能装一个值，新值会覆盖旧值（旧的消失，不是并存）。\n没赋值就使用 → 编译报错。" },
+
+  { id:"types", tags:["P1-基础"], kw:["int","double","boolean","String","类型","基本类型","盒子家族","取值范围"],
+    title:"常用类型（盒子家族）",
+    body:"int 整数（±21亿内）｜double 小数｜boolean 真假（true/false）｜String 一串文字（S 大写）。\n类型决定：能装什么、占多大空间、取值范围、能做什么运算。\n装错种类 → 编译报错（如 String 无法转换为 int）。" },
+
+  { id:"naming", tags:["P1-基础"], kw:["命名","小驼峰","大驼峰","常量","final","全大写","关键字","见名知意"],
+    title:"命名规范与 final 常量",
+    body:"变量：小驼峰 myScore；类名：大驼峰 Demo；常量：全大写 MAX_SCORE。\n规则：不能数字开头、不能用关键字、只用英文（别用拼音/中文）、见名知意。\nfinal 常量：值不能再改，如 final double PI = 3.14159;" },
+
+  { id:"convert", tags:["P1-基础"], kw:["类型转换","自动转换","强制转换","强转","(int)","截断","175.5","精度"],
+    title:"类型转换：自动 vs 强制",
+    body:"小盒子 → 大盒子：自动（int → double，不丢东西，不用写任何东西）。\n大盒子 → 小盒子：必须强转 (int)，否则编译报错；强转会丢小数部分（175.9 → 175，是截断不是四舍五入）。\n口诀：能无损就自动，有损失就强转，损失你负责。" },
+
+  { id:"int-div", tags:["P1-基础","报错"], kw:["整数除法","整除","9/5","132","截断","小数","9.0","精度丢失"],
+    title:'整数除法坑（"132 事件"）',
+    body:"两个整数相除，结果还是整数（小数被截断）：9 / 5 = 1，7 / 2 = 3。\n温度转换器写 double f = 9 / 5 * c + 32; 输入 100 得 132（应 212）。\n修复：让其中一个数带小数点 → 9.0 / 5 = 1.8。\n注意：装进 double 盒子也救不了（先按整数算完再装箱）。" },
+
+  { id:"scanner", tags:["P1-基础"], kw:["Scanner","nextLine","nextInt","System.in","键盘","输入","close","四件套"],
+    title:"Scanner 输入四件套",
+    body:"import java.util.Scanner; → Scanner sc = new Scanner(System.in); → sc.nextLine() 读一整行文字 / sc.nextInt() 读一个整数 → sc.close();\nSystem.in = 键盘，System.out = 屏幕。\nnextLine() 读到的是文字（String），要数字需 Integer.parseInt()。" },
+
+  { id:"scanner-trap", tags:["P1-基础","报错"], kw:["nextInt nextLine","读到空","回车","残留","管道","缓冲区","空字符串"],
+    title:"Scanner 大坑：nextInt 后 nextLine 读到空",
+    body:"nextInt() 只拿走数字，把回车留在管道里；紧接的 nextLine() 立刻读到那个回车 → 得到空字符串。\n解法1（推荐）：统一 nextLine() 读一行，再 Integer.parseInt() 转数字。\n解法2：nextInt() 后补一句 sc.nextLine(); 把回车吃掉。" },
+
+  { id:"parseint", tags:["P1-基础"], kw:["Integer.parseInt","文字转数字","NumberFormatException","String 无法转换为 int","翻译官"],
+    title:"Integer.parseInt：把文字变成数字",
+    body:'Integer.parseInt("18") → 数字 18（逐字符翻译：1×10+8）。\n键盘读进来的一切都是文字，要装进 int 盒子必须翻译。\n给它不能翻译的文字（"abc"）会抛 NumberFormatException。\n安全写法：把确定的字面量放前面 → "吴政闻".equals(input)。' },
+
+  { id:"float", tags:["P1-基础"], kw:["浮点","小数","精度","0.1+0.2","0.30000000000000004","Math.abs","BigDecimal","算钱"],
+    title:"浮点数不能直接用 == 比较",
+    body:"0.1 + 0.2 结果是 0.30000000000000004，所以 0.1 + 0.2 == 0.3 是 false。\n原因：十进制小数在二进制里是无限循环小数，double 只能存近似值，误差累积。\n比较两个小数：Math.abs(a - b) < 0.000001（看\"距离\"够不够近）。\n精确计算（钱）：用 BigDecimal（add/multiply 方法，用字符串构造 new BigDecimal(\"0.1\")）。" },
+
+  { id:"compare", tags:["P1-判断"], kw:["比较运算符",">=","==","!=","boolean","真假","关系运算"],
+    title:"比较运算符的结果是 boolean",
+    body:"> < >= <= == != 算出来的都是 true/false。\nif 括号里要的正是这个真假值。\n注意：赋值用 =，比较用 ==（if (score = 60) 会编译报错）。" },
+
+  { id:"if-chain", tags:["P1-判断"], kw:["if","else","else if","分支","成绩分级","命中即退出","链"],
+    title:"if / else if / else 链",
+    body:"从上往下判断，命中一个分支就退出整条链。\n所以\"≥80 良好\"那档不用写 80~89：能走到它，说明已被 ≥90 排除、且 ≥80。\n条件必须是 boolean；花括号建议永远写。" },
+
+  { id:"string-equals", tags:["P1-判断"], kw:["equals","==","String 比较","门牌号","柜子","地址","暗号","判空","null"],
+    title:"String 比较必须用 equals（== 比门牌号）",
+    body:"String 变量的盒子里装的是\"文字住在哪个柜子\"的编号（内存地址）。\n== 比的是\"是不是同一个柜子\"；equals 是打开柜子逐字比内容。\n键盘输入的 \"芝麻开门\" 是新柜子，和代码里的字面量（公共档案）编号不同 → == 判 false。\n唯一必须用 == 的场景：判空 name == null（null 没有柜子，用 equals 会崩）。" },
+
+  { id:"logic-ops", tags:["P1-判断"], kw:["&&","||","!","且","或","非","交集","并集","登录校验"],
+    title:"逻辑运算符 && || !",
+    body:"&& 且：两个都真才真（交集）——登录校验用它（用户名对 && 密码对）。\n|| 或：一个真就真（并集）——用错会让\"密码错了也放行\"。\n! 非：取反。" },
+
+  { id:"short-circuit", tags:["P1-判断"], kw:["短路","见假就停","见真就停","除零","count > 0"],
+    title:"逻辑短路",
+    body:"A && B：A 为假 → B 根本不执行（结果必然假）。\nA || B：A 为真 → B 根本不执行（结果必然真）。\n口诀：&& 见假就停，|| 见真就停。\n用途：if (count > 0 && total / count > 10) 先挡住除零。" },
+
+  { id:"plus-plus", tags:["P1-判断"], kw:["++","--","自增","前缀","后缀","前加后用","后加先用","a++","++a"],
+    title:"++ 自增的前缀与后缀",
+    body:"int a = 4; int b = a++; → b 拿到 4（旧值），a 变 5。\nint c = ++a; → a 先变 6，c 拿到 6。\n所以最终 a=6，b=4，c=6。\n口诀：前加后用，后加先用（++ 不管前后 a 都会 +1，区别只在交出去的值是新的还是旧的）。" },
+
+  { id:"ternary", tags:["P1-判断"], kw:["三元","? :","二选一","条件运算符","max"],
+    title:"三元运算符 条件 ? A : B",
+    body:"int max = (a > b) ? a : b; 读作：a>b 吗？是取 a，否取 b。\n问号前必须是 boolean；结果盒子的类型 = 冒号两边值的类型（两边是 String 就用 String 装）。\n适合简单二选一；逻辑复杂就用 if/else（可读性优先）。" },
+
+  { id:"switch", tags:["P1-判断"], kw:["switch","case","->","default","break","穿透","fall-through"],
+    title:"switch 多路分支",
+    body:"String week = switch (day) { case 1 -> \"周一\"; default -> \"未知\"; };\n只能判断\"相等\"，不能比大小。default 是所有 case 都不匹配时的兜底。\n老写法 case 1: ... break; 漏了 break 会\"穿透\"，继续执行下一个 case（经典 bug）；箭头写法天生不会穿透。" },
+
+  { id:"modulo", tags:["P1-判断"], kw:["%","取余","余数","奇偶","整除判断"],
+    title:"% 取余数",
+    body:"7 % 2 = 1（7÷2 商 3 余 1）；10 % 5 = 0。\n判断整除全靠它：x % 2 == 0 是偶数；year % 4 == 0 是能被 4 整除。\n注意：Java 里 -7 % 3 = -1（符号跟被除数走）。" },
+
+  { id:"leapyear", tags:["P1-判断"], kw:["闰年","Leapyear","1900","2000","div400","div4","not100"],
+    title:"闰年判断（条件组合实战）",
+    body:"规则：能被 400 整除，或者（能被 4 整除 且 不能被 100 整除）。\nboolean leap = (year % 400 == 0) || (year % 4 == 0 && year % 100 != 0);\n拆变量写法更易读：div400 / div4 / not100 三个变量再组合。\n测试：2024 闰、1900 不闰（陷阱）、2000 闰、2023 不闰。" },
+
+  { id:"skeleton", tags:["工具"], kw:["骨架","模板","程序结构","骨架 A","默写","步骤","顺序"],
+    title:"程序骨架模板（写新程序先搭骨架）",
+    body:"import java.util.Scanner; → public class 类名 { → public static void main(String[] args) { → Scanner sc = new Scanner(System.in); → 问话 → 读 → 逻辑 → println 输出 → sc.close(); → 补两个 }。\n写完自查 5 条：①import 有吗 ②类名=文件名 ③分号 ④括号配对 ⑤类型对不对。\n骨架永远不变，变化的只有逻辑那块。" },
+
+  { id:"method-call", tags:["报错"], kw:["方法调用","括号","sc.close","动作","println","没输出"],
+    title:"方法调用必须带括号",
+    body:"动作必须带括号才算执行：println(...)、close()、nextLine()、equals(...)。\n写 sc.close; 会报错（Java 以为你在说一个变量）。\n算完不打印 = 白算：别忘了 System.out.println(结果)。" },
+
+  { id:"ide-tips", tags:["工具"], kw:["Ctrl+D","复制行","Ctrl+Alt+L","格式化","快捷键","Alt+F12","Terminal","终端","psvm","sout"],
+    title:"IDEA 常用操作",
+    body:"Alt+F12 打开/关闭终端（Terminal）；Shift+F10 运行；Shift+F9 调试。\nsout + Tab → System.out.println(); psvm + Tab → main 方法。\nCtrl+D 复制当前行（光标停在行上即可，不用选中；注意焦点要在编辑器里，别在终端里按）。\nCtrl+Alt+L 一键格式化代码。" },
+
+  { id:"ai-era", tags:["规划"], kw:["AI","Cursor","Copilot","2030","双非","实习","学习方向","三层","判断力"],
+    title:"AI 时代的学习方向（三层模型）",
+    body:"第一层\"把需求翻译成常规代码\"正被 AI 大幅替代；第二层\"判断与兜底（AI 写的对不对、报错怎么查、性能怎么优化）\"替代不了且在升值；第三层\"定义问题（拆需求、架构取舍、业务理解）\"长期无法替代。\n结论：基础是判断力的来源，越过硬越安全；叠加三条线——AI 工具线、工程能力线、真实项目线。\n双非破局：可验证的作品集 + 真实实习 + 会用 AI 放大产出。" },
+
+  { id:"habit", tags:["规划"], kw:["笔记","打卡","复盘","复习速查卡","军规","习惯","周小结"],
+    title:"学习习惯与复盘机制",
+    body:"每天有产出（代码或笔记），当天推 GitHub。\n卡壳超 2 天必须求助；报错贴全文。\n每阶段验收通过才进下一阶段；清单不自己打勾，改为课前快问快答抽查。\n工具：01-JavaSE/复习速查卡.md、程序骨架模板.md、本复习助手。" }
+];
+
+/* ============ 基础工具 ============ */
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+const esc = (s) => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+
+function highlight(text, terms){
+  let out = esc(text);
+  if(!terms.length) return out;
+  const sorted = terms.slice().sort((a,b)=>b.length-a.length);
+  sorted.forEach(t=>{
+    if(!t) return;
+    out = out.replace(new RegExp(escRe(esc(t)),"gi"), (m)=> "<mark>"+m+"</mark>");
+  });
+  return out;
+}
+
+function scoreEntry(e, terms){
+  let sc = 0;
+  terms.forEach(t=>{
+    const lt = t.toLowerCase();
+    if(e.kw.some(k=>k.toLowerCase()===lt)) sc += 8;
+    else if(e.kw.some(k=>k.toLowerCase().includes(lt))) sc += 5;
+    if(e.title.toLowerCase().includes(lt)) sc += 4;
+    if(e.tags.some(g=>g.toLowerCase().includes(lt))) sc += 2;
+    if(e.body.toLowerCase().includes(lt)) sc += 1;
+  });
+  return sc;
+}
+
+function search(query, tag){
+  const terms = String(query||"").trim().split(/\s+/).filter(Boolean);
+  let list = KB.map(e=>({ e, sc: terms.length ? scoreEntry(e, terms) : 0 }));
+  if(terms.length) list = list.filter(x=>x.sc>0);
+  else list = list.map(x=>({ e:x.e, sc:0 }));
+  if(tag && tag !== "全部") list = list.filter(x=>x.e.tags.includes(tag));
+  if(terms.length) list.sort((a,b)=> b.sc - a.sc || a.e.title.localeCompare(b.e.title,"zh"));
+  return list.map(x=>x.e);
+}
+
+/* ============ 渲染 ============ */
+let currentTag = "全部";
+let currentQuery = "";
+
+function cardHTML(e, terms, opts){
+  opts = opts || {};
+  const tags = e.tags.map(t=>'<span class="tagline">'+esc(t)+'</span>').join("");
+  const body = highlight(e.body, terms);
+  let extra = "";
+  if(opts.quiz){
+    extra = '<div class="answer" id="ans-'+esc(e.id)+'"><div class="body">'+body+'</div></div>'+
+            '<div style="margin-top:10px"><button class="ghost mini" data-toggle="'+esc(e.id)+'">显示答案</button></div>';
+    return '<div class="card"><h3>'+esc(e.title)+'</h3><div class="meta">'+tags+'<span>自我抽查：先自己讲一遍，再看答案</span></div>'+extra+'</div>';
+  }
+  return '<div class="card"><h3>'+highlight(e.title, terms)+'</h3>'+
+         '<div class="meta">'+tags+'</div>'+
+         '<div class="body">'+body+'</div></div>';
+}
+
+function renderResults(el, list, terms, opts){
+  if(!list.length){
+    el.innerHTML = '<div class="empty">没有找到相关知识点 —— 换个关键词试试（例如：equals / 短路 / Scanner / 报错）</div>';
+    return;
+  }
+  el.innerHTML = list.map(e=>cardHTML(e, terms, opts)).join("");
+}
+
+function initChips(){
+  const all = ["全部"];
+  KB.forEach(e=>e.tags.forEach(t=>{ if(!all.includes(t)) all.push(t); }));
+  $("#chips").innerHTML = all.map(t=>'<span class="chip'+(t===currentTag?" active":"")+'" data-tag="'+esc(t)+'">'+esc(t)+'</span>').join("");
+}
+
+function doSearch(){
+  currentQuery = $("#q").value;
+  const terms = currentQuery.trim().split(/\s+/).filter(Boolean);
+  const list = search(currentQuery, currentTag);
+  renderResults($("#results"), list, terms);
+}
+
+/* ============ 提问记录（独立存储） ============ */
+const LS_KEY = "java_review_qa_log_v1";
+function loadLog(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); }catch(err){ return []; }
+}
+function saveLog(arr){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }catch(err){ /* file:// 下可能不可用，忽略 */ }
+}
+function addLog(question, hits){
+  const arr = loadLog();
+  arr.unshift({ t: new Date().toLocaleString("zh-CN"), q: question, hits: hits.map(h=>h.title) });
+  saveLog(arr);
+  renderLog();
+}
+function renderLog(){
+  const arr = loadLog();
+  if(!arr.length){ $("#logList").innerHTML = '<div class="empty">还没有提问记录</div>'; return; }
+  $("#logList").innerHTML = arr.map(x=>'<div class="qa-item"><div class="q">❓ '+esc(x.q)+'</div>'+
+    '<div class="when">'+esc(x.t)+' · 命中：'+esc((x.hits||[]).join("；"))+'</div></div>').join("");
+}
+
+/* ============ 事件绑定 ============ */
+$$(".tab").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    $$(".tab").forEach(b=>b.classList.remove("active"));
+    $$(".panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    $("#tab-"+btn.dataset.tab).classList.add("active");
+    if(btn.dataset.tab === "log") renderLog();
+  });
+});
+
+document.addEventListener("click", (ev)=>{
+  const chip = ev.target.closest(".chip");
+  if(chip){
+    currentTag = chip.dataset.tag;
+    $$(".chip").forEach(c=>c.classList.toggle("active", c.dataset.tag===currentTag));
+    doSearch();
+    return;
+  }
+  const tg = ev.target.closest("[data-toggle]");
+  if(tg){
+    const box = document.getElementById("ans-"+tg.dataset.toggle);
+    if(box){
+      box.classList.toggle("show");
+      tg.textContent = box.classList.contains("show") ? "隐藏答案" : "显示答案";
+    }
+  }
+});
+
+$("#btnSearch").addEventListener("click", doSearch);
+$("#q").addEventListener("keydown", (e)=>{ if(e.key === "Enter") doSearch(); });
+
+$("#btnRandom").addEventListener("click", ()=>{
+  const e = KB[Math.floor(Math.random()*KB.length)];
+  $("#results").innerHTML = '<div class="hint">🎲 随机抽查（先自己讲，再点"显示答案"）</div>' + cardHTML(e, [], {quiz:true});
+});
+
+$("#btnAsk").addEventListener("click", ()=>{
+  const qq = $("#qaInput").value.trim();
+  if(!qq){ $("#qaResult").innerHTML = '<div class="empty">先写下你的疑问</div>'; return; }
+  const terms = qq.split(/\s+/).filter(Boolean);
+  const list = search(qq, "全部").slice(0,3);
+  renderResults($("#qaResult"), list, terms);
+  addLog(qq, list);
+});
+$("#qaInput").addEventListener("keydown", (e)=>{ if(e.key === "Enter") $("#btnAsk").click(); });
+
+$("#btnClear").addEventListener("click", ()=>{
+  if(confirm("确定清空提问记录吗？")){ saveLog([]); renderLog(); }
+});
+$("#btnExport").addEventListener("click", ()=>{
+  const arr = loadLog();
+  const md = "# 我的提问记录\n\n" + arr.map(x=>"- **"+x.q+"** （"+x.t+"）\n  - 命中："+(x.hits||[]).join("；")).join("\n");
+  const blob = new Blob([md], {type:"text/markdown;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "提问记录.md";
+  a.click();
+});
+$("#btnCopy").addEventListener("click", ()=>{
+  const arr = loadLog();
+  const md = "# 我的提问记录\n\n" + arr.map(x=>"- **"+x.q+"** （"+x.t+"）").join("\n");
+  if(navigator.clipboard){ navigator.clipboard.writeText(md).then(()=>alert("已复制到剪贴板")); }
+  else alert("复制失败，请用\"导出为文件\"");
+});
+
+/* ============ 启动 ============ */
+$("#stat").textContent = "知识库 " + KB.length + " 条 · 覆盖 P0 ~ P1 第 2 课";
+initChips();
+renderResults($("#results"), KB, []);
+renderLog();
+</script>
+</body>
+</html>

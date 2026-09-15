@@ -4,7 +4,7 @@ public class PlusTest {
         int y =(x++) + 1;
         System.out.println("x=" + x + ",y=" + y);
 
-        int a = 5;
+        int a = 4;
         int b = a++;
         int c = ++a;
         System.out.println("a=" + a + ",b=" + b + ",c=" + c);
