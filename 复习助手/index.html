@@ -106,7 +106,7 @@
   </section>
 </main>
 
-<footer>Java 复习助手 v1 · 知识库范围：P0 ~ P1 第 2 课 · 由老师随课程持续更新</footer>
+<footer>Java 复习助手 v1.1 · 知识库范围：P0 ~ P1 第 3 课（循环） · 由老师随课程持续更新</footer>
 
 <script>
 /* ============ 知识库（随课程持续补充） ============ */
@@ -229,7 +229,51 @@ const KB = [
 
   { id:"habit", tags:["规划"], kw:["笔记","打卡","复盘","复习速查卡","军规","习惯","周小结"],
     title:"学习习惯与复盘机制",
-    body:"每天有产出（代码或笔记），当天推 GitHub。\n卡壳超 2 天必须求助；报错贴全文。\n每阶段验收通过才进下一阶段；清单不自己打勾，改为课前快问快答抽查。\n工具：01-JavaSE/复习速查卡.md、程序骨架模板.md、本复习助手。" }
+    body:"每天有产出（代码或笔记），当天推 GitHub。\n卡壳超 2 天必须求助；报错贴全文。\n每阶段验收通过才进下一阶段；清单不自己打勾，改为课前快问快答抽查。\n工具：01-JavaSE/复习速查卡.md、程序骨架模板.md、本复习助手。" },
+
+  { id:"for-loop", tags:["P1-循环"], kw:["for","循环","初始化","条件","步进","执行顺序","遍历","次数确定"],
+    title:"for 循环：三件套与执行顺序",
+    body:"for (初始化; 条件; 步进) { 循环体 }\n执行顺序：①初始化（只做一次）→ ②条件判断 → ③循环体 → ④步进 → 回到②……条件为假时退出。\n适合“知道循环次数”的场景（打印 1~100）。\n注意：i 声明在 for 头里，只在这个循环内有效，出了循环就不存在（作用域）。" },
+
+  { id:"while-loop", tags:["P1-循环"], kw:["while","循环","不知道次数","条件结束","步进自己写"],
+    title:"while 循环：只要条件成立就一直转",
+    body:"初始化写在循环外面，头上只写条件：while (i <= 100) { sum += i; i++; }\n适合“次数不确定、靠条件结束”的场景：一直输入直到 -1、一直猜直到猜中。\n步进必须自己写在循环体里，忘了就是死循环；条件一开始为假则一次都不执行。\n与 for 本质等价，可以互相改写。" },
+
+  { id:"do-while", tags:["P1-循环"], kw:["do-while","至少执行一次","先做再判断","输入校验","菜单"],
+    title:"do-while：至少执行一次",
+    body:"do { 循环体 } while (条件);\n先做一遍，再判断要不要继续 → 天然适合“至少发生一次”的场景：输入校验、菜单、猜数字。\n与 while 的区别：while 先判断（可能一次都不做）；do-while 先做再判断（至少一次）。\n注意结尾 while(...) 后面的分号是语法要求的，不能省。" },
+
+  { id:"dead-loop", tags:["P1-循环","报错"], kw:["死循环","停不下来","刷屏","红色方块","忘记步进"],
+    title:"死循环：怎么产生、怎么停",
+    body:"循环条件永远为真 → 程序卡在循环里。最常见原因：忘了写步进（i++ / count++）。\n跑出来了别慌：点控制台左上角的红色方块 ■ 停止程序。\n预防：while / do-while 的循环体里必须有改变条件的语句；不确定时先用小数字测试。" },
+
+  { id:"break-continue", tags:["P1-循环"], kw:["break","continue","跳出","跳过本次","全剧终"],
+    title:"break 与 continue",
+    body:"break = 全剧终：立刻跳出整个循环。\ncontinue = 这一集跳过：结束本轮，直接进入下一轮判断。\n例子：if (i % 2 != 0) continue; → 只打印偶数；猜中时 break → 结束游戏。\n注意：break 后面的语句永远不会执行——要打印提示就写在 break 前面。" },
+
+  { id:"nested-loop", tags:["P1-循环"], kw:["嵌套循环","九九乘法表","图形","行","列","制表符","\\t"],
+    title:"嵌套循环与九九乘法表",
+    body:"外层控制“行”，内层控制“列”；外层转一圈，内层要跑满一整轮（内层快、外层慢）。\n九九乘法表核心：外层 row 从 1 到 9；内层 for (col = 1; col <= row; col++) 打印 col + × + row + = + col*row + 制表符；每行结束用空的 println() 换行。\ncol <= row 是精髓（打出三角形）；制表符 \t 用来对齐列。" },
+
+  { id:"loop-roles", tags:["P1-循环"], kw:["累加器","计数器","打擂台","最大值","最小值","sum","count","max"],
+    title:"循环三大角色：累加器 / 计数器 / 打擂台",
+    body:"累加器：int sum = 0; 循环里 sum += i;（求和）——必须写在循环外面，写在里面会被反复清零。\n计数器：int count = 0; 循环里 count++;（数次数/个数）。\n打擂台：int max = 第一个数; 循环里 if (x > max) max = x;（找最大/最小）。\n坑：擂主初值别随便设 0，否则输入全是负数时会错答 0；用第一个数当擂主最稳。" },
+
+  { id:"random", tags:["P1-循环"], kw:["Math.random","随机数","1~100","猜数字","取整"],
+    title:"生成 1~100 的随机数",
+    body:"int answer = (int)(Math.random() * 100) + 1;\n原理：Math.random() 返回 [0.0, 1.0) 的小数 → ×100 得 [0,100) → (int) 截断得 0~99 → +1 得 1~100。\n没有 +1 就只能取到 0~99（会出现 0，永远取不到 100）。" },
+
+  { id:"input-validate", tags:["P1-循环","报错"], kw:["NumberFormatException","空输入","回车","输入校验","用户输入不可信","trim","isEmpty","try-catch"],
+    title:"输入校验：用户输入永远不可信",
+    body:"空输入（直接回车）或输入 abc → Integer.parseInt 翻译不了 → 抛 NumberFormatException，程序崩溃：Exception in thread “main” java.lang.NumberFormatException: For input string: “”（读异常栈时从下往上看，找到自己的文件名那一行就是案发地）。\n防法 1：String line = sc.nextLine().trim(); if (line.isEmpty()) { 提示; continue; } 然后再 parseInt。\n防法 2（能挡所有非数字输入）：try { guess = Integer.parseInt(line); } catch (NumberFormatException e) { 提示; continue; }" },
+
+  { id:"print-println", tags:["P1-基础"], kw:["print","println","换行","转义字符","制表符","格式"],
+    title:"print vs println 与转义字符",
+    body:"print 打印后不换行（同一行接着排）；println 打印后换行；空的 println() 只换行。\n画图形/表格：内层用 print，每行末尾用空的 println() 换行。\n转义字符：\\t 制表符（跳到下一个制表位，用来对齐）、\\n 换行、\\\\ 输出一个反斜杠、\\\" 输出一个双引号。" },
+
+  { id:"semicolon-trap", tags:["P1-循环","报错"], kw:["分号陷阱","找不到变量 i","for(...);","if(...);","作用域"],
+    title:"分号陷阱：for / if 括号后面别加分号",
+    body:"for (int i = 1; i <= 5; i++); { ... } —— 分号让循环体变成“空语句”，后面的 { } 变成普通代码块，i 出了作用域 → 报“找不到变量 i”。\nif (x > max); { max = x; } —— 分号让 if 变空，max = x 会无条件执行（结果永远是错的，而且不报错）。\n规矩：for / if 的圆括号后面直接跟 {，中间不要有分号（do-while 结尾的 while(...); 是例外）。" }
 ];
 
 /* ============ 基础工具 ============ */
