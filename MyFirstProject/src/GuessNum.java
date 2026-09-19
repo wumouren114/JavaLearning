@@ -3,11 +3,16 @@ import java.util.Scanner;
 public class GuessNum {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        int answer = 50;
+        int answer =(int)(Math.random() * 100) + 1;
         int count = 0;
         int guess = 0;
         do {
             System.out.print("输入一个数字（共 7 次机会）：");
+            String line = sc.nextLine().trim();
+            if (line.isEmpty()) {
+                System.out.println("输入内容为空，请重新输入");
+                continue;
+            }
             guess = Integer.parseInt(sc.nextLine());
             count++;
 
