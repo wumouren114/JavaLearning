@@ -13,7 +13,7 @@ public class GuessNum {
                 System.out.println("输入内容为空，请重新输入");
                 continue;
             }
-            guess = Integer.parseInt(sc.nextLine());
+            guess = Integer.parseInt(line);
             count++;
 
             if (guess > answer) {
