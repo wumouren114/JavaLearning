@@ -1,8 +1,0 @@
-[50416:35240:0927/145050.629:ERROR:t_jank_stack_capture.cpp(305)] JankStackCapture: SymInitialize failed, gle=87
-[50416:36212:0927/145050.637:WARNING:t_skinfilemap.cpp(56)] SGRenderLog:CheckUpdate newMem.OpenMem failed, szNewMem:Local\sgime_skin.v2.filemap.sogouime err:系统错误2: 系统找不到指定的文件。  
-打开Filemap失败: Local\sgime_skin.v2.filemap.sogouime5293b246507
-[50416:36212:0927/145050.637:WARNING:t_skinfilemap.cpp(65)] SGRenderLog:CheckUpdate finish: old version:1
-[50416:36212:0927/145050.637:WARNING:t_skinfilemap.cpp(67)] SGRenderLog:CheckUpdate finish: new version:2
-[50416:36212:0927/145050.668:WARNING:t_skinfilemap.cpp(63)] SGRenderLog:CheckUpdate newMem.OpenMem Suc, szNewMem:Local\sgime_skin.Dpi144.v2.filemap.sogouime
-[50416:36212:0927/145050.669:WARNING:t_skinfilemap.cpp(65)] SGRenderLog:CheckUpdate finish: old version:2
-[50416:36212:0927/145050.669:WARNING:t_skinfilemap.cpp(67)] SGRenderLog:CheckUpdate finish: new version:2
