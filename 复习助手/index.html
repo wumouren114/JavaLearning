@@ -251,7 +251,7 @@ const KB = [
     title:"break 与 continue",
     body:"break = 全剧终：立刻跳出整个循环。\ncontinue = 这一集跳过：结束本轮，直接进入下一轮判断。\n例子：if (i % 2 != 0) continue; → 只打印偶数；猜中时 break → 结束游戏。\n注意：break 后面的语句永远不会执行——要打印提示就写在 break 前面。" },
 
-  { id:"nested-loop", tags:["P1-循环"], kw:["嵌套循环","九九乘法表","图形","行","列","制表符","\\t"],
+  { id:"nested-loop", tags:["P1-循环"], kw:["嵌套循环","九九乘法表","图形","行","列","外层循环","内层循环","行数","列数","row","col","制表符","\\t"],
     title:"嵌套循环与九九乘法表",
     body:"外层控制“行”，内层控制“列”；外层转一圈，内层要跑满一整轮（内层快、外层慢）。\n九九乘法表核心：外层 row 从 1 到 9；内层 for (col = 1; col <= row; col++) 打印 col + × + row + = + col*row + 制表符；每行结束用空的 println() 换行。\ncol <= row 是精髓（打出三角形）；制表符 \t 用来对齐列。" },
 
@@ -267,13 +267,45 @@ const KB = [
     title:"输入校验：用户输入永远不可信",
     body:"空输入（直接回车）或输入 abc → Integer.parseInt 翻译不了 → 抛 NumberFormatException，程序崩溃：Exception in thread “main” java.lang.NumberFormatException: For input string: “”（读异常栈时从下往上看，找到自己的文件名那一行就是案发地）。\n防法 1：String line = sc.nextLine().trim(); if (line.isEmpty()) { 提示; continue; } 然后再 parseInt。\n防法 2（能挡所有非数字输入）：try { guess = Integer.parseInt(line); } catch (NumberFormatException e) { 提示; continue; }" },
 
-  { id:"print-println", tags:["P1-基础"], kw:["print","println","换行","转义字符","制表符","格式"],
+  { id:"print-println", tags:["P1-基础"], kw:["print","println","换行","转义字符","制表符","tab","对齐","格式"],
     title:"print vs println 与转义字符",
     body:"print 打印后不换行（同一行接着排）；println 打印后换行；空的 println() 只换行。\n画图形/表格：内层用 print，每行末尾用空的 println() 换行。\n转义字符：\\t 制表符（跳到下一个制表位，用来对齐）、\\n 换行、\\\\ 输出一个反斜杠、\\\" 输出一个双引号。" },
 
   { id:"semicolon-trap", tags:["P1-循环","报错"], kw:["分号陷阱","找不到变量 i","for(...);","if(...);","作用域"],
     title:"分号陷阱：for / if 括号后面别加分号",
-    body:"for (int i = 1; i <= 5; i++); { ... } —— 分号让循环体变成“空语句”，后面的 { } 变成普通代码块，i 出了作用域 → 报“找不到变量 i”。\nif (x > max); { max = x; } —— 分号让 if 变空，max = x 会无条件执行（结果永远是错的，而且不报错）。\n规矩：for / if 的圆括号后面直接跟 {，中间不要有分号（do-while 结尾的 while(...); 是例外）。" }
+    body:"for (int i = 1; i <= 5; i++); { ... } —— 分号让循环体变成“空语句”，后面的 { } 变成普通代码块，i 出了作用域 → 报“找不到变量 i”。\nif (x > max); { max = x; } —— 分号让 if 变空，max = x 会无条件执行（结果永远是错的，而且不报错）。\n规矩：for / if 的圆括号后面直接跟 {，中间不要有分号（do-while 结尾的 while(...); 是例外）。" },
+
+  { id:"null", tags:["P1-基础","报错"], kw:["null","空指针","NullPointerException","默认值","判空","isEmpty"],
+    title:"null 是什么？空指针异常怎么防",
+    body:"null = “什么都没有”的空引用：变量的盒子里没有指向任何对象（连柜子都没有）。\n各类型默认值：int→0、double→0.0、boolean→false、String / 数组 / 对象→null。所以 new String[5] 里的元素默认全是 null，直接用会崩。\n对 null 调用方法会抛 NullPointerException（空指针异常，新手第一大杀手）：null.length()、null.equals(...) 都会崩。\n两条防身规则：① 判断是否为 null 必须用 ==（if (name == null)），不能用 equals；② 安全比较把确定的字面量放前面：“吴政闻”.equals(name)（name 是 null 也只返回 false）。" },
+
+  { id:"array-basic", tags:["P1-数组"], kw:["数组","声明","创建","new int","下标","编号","length","默认值","0开始","长度"],
+    title:"数组基础：声明、编号、长度、默认值",
+    body:"int[] scores = new int[5]; —— 造一排 5 个 int 格子。\n括号里的 5 是“数量（length）”，不是最大编号！编号从 0 开始：第 1 个是 scores[0]，最后一个（第 5 个）是 scores[4]。\n最大合法编号 = length - 1；scores.length 没有括号（是属性，不是方法）。\n默认值：int 数组不赋值时全是 0（String 数组是 null，boolean 是 false）。\n声明时直接给值：int[] a = {1, 2, 3};" },
+
+  { id:"array-oob", tags:["P1-数组","报错"], kw:["越界","ArrayIndexOutOfBoundsException","下标越界","length - 1","Exception","崩溃"],
+    title:"数组越界异常 ArrayIndexOutOfBoundsException",
+    body:"访问不存在的编号会抛异常，程序直接崩：scores[5] → Exception in thread “main” java.lang.ArrayIndexOutOfBoundsException: Index 5 out of bounds for length 5（下标 5 越界，数组长度只有 5）。\n读法：长度是 5，合法编号只有 0~4；想取最后一个用 scores[scores.length - 1]。\n遍历写 i < scores.length（永远不要写 <=，否则 i 会走到 5 而崩）。" },
+
+  { id:"array-store-read", tags:["P1-数组"], kw:["存","取","赋值","scores[i]","读取","等号方向","录入"],
+    title:"数组的两个动作：存（写入）与取（读取）",
+    body:"存（写入）：scores[i] = 用户输入; —— 等号左边是格子，把值放进去。\n取（读取）：System.out.println(scores[i]); 或 sum += scores[i]; —— 把格子里的东西拿出来用，不改变数组内容。\n记忆：= 左边是“往哪放”，右边是“放什么”。\n录入循环只能做“存”，打印/统计循环才是“取”。" },
+
+  { id:"array-traverse", tags:["P1-数组"], kw:["遍历","增强for","for-each","只读","副本","下标"],
+    title:"遍历数组：普通 for 与增强 for",
+    body:"普通 for：for (int i = 0; i < scores.length; i++) { 用 scores[i]; } —— 能拿到下标，可读可写。\n增强 for：for (int s : scores) { 用 s; } —— s 依次是每个格子的值，写法短、不会越界，但拿不到下标。\n关键坑：增强 for 里的 s 是“值的副本”，改 s 不会改到数组，所以录入/修改必须用普通 for。\n选择口诀：只读遍历用增强 for；要下标、要写入用普通 for。" },
+
+  { id:"array-ref", tags:["P1-数组"], kw:["引用","int[] b = a","复制","Arrays.copyOf","地址","陷阱"],
+    title:"数组引用陷阱：int[] b = a 不是复制",
+    body:"int[] a = {1,2,3}; int[] b = a; b[0] = 99; → a[0] 也变成 99！\n原因：数组变量里存的是“这排柜子的地址（门牌号）”，int[] b = a 只是把门牌号抄了一份，两个变量指向同一排柜子。\n想真正复制（新造一排一样的柜子）：int[] c = Arrays.copyOf(a, a.length);" },
+
+  { id:"arrays-util", tags:["P1-数组","工具"], kw:["Arrays","sort","toString","排序","打印数组","最大值","最小值"],
+    title:"Arrays 工具类：打印与排序",
+    body:"import java.util.Arrays; 之后可用：\nArrays.toString(scores) —— 一次打印整个数组：[88, 92, 70]（直接 println(数组) 只会打印 [I@1b6d3586 这种地址乱码）。\nArrays.sort(scores) —— 从小到大排序，直接改原数组（原地排序）。\n排序后：最小值 = scores[0]，最大值 = scores[scores.length - 1]。\n倒序遍历：for (int i = scores.length - 1; i >= 0; i--)。" },
+
+  { id:"tab-deep", tags:["P1-基础","工具"], kw:["制表符","tab","对齐","制表位","tab stop","表格","printf","格式化","宽度","空格","歪"],
+    title:"制表符 \\t 详解：为什么能对齐、什么时候会歪",
+    body:"① \\t 是什么：制表符（Tab），输出时不是插入固定几个空格，而是“跳到下一个制表位”。\n② 制表位机制：控制台/编辑器默认每隔固定宽度（通常 8 个字符）设一个“站位”（第 1、9、17、25…列）。所以内容长短不同也能大致排开。\n③ 为什么还会歪：站位固定，内容长度不齐时跳到的位置就有差；中文等全角字符占 2 个宽度，会让偏差更明显。所以 \\t 是“大致对齐”，不是“像素级对齐”。\n④ 正确用法：内层用 print 打印“内容 + \\t”，每行结束后用空的 println() 换行；如果内层用 println，就会变成一格一行。\n⑤ 想要真正的整齐（进阶）：用 printf / String.format 指定宽度——System.out.printf(\"%-6s\", 内容) 表示左对齐占 6 个字符宽；数字保留两位小数用 %.2f。\n⑥ 常见误解：\\t ≠ “两个空格/四个空格”；记事本里按 Tab 键是同一机制，编辑器可改 Tab 显示宽度，所以同一文件在不同设置下宽度不同。" }
 ];
 
 /* ============ 基础工具 ============ */
